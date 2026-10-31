@@ -49,6 +49,7 @@ NRA15/NRA24 sensors can use US-D1_V0 or NRA protocol depending on firmware confi
 
 * **MSP** - External rangefinder via MSP protocol (UART/MSP)
 * **BENEWAKE** - Benewake LIDAR modules (TFmini, etc.) via serial protocol (UART)
+* **ARKDIST** - [ARK DIST SR](https://docs.arkelectron.com/products/sensor/ark-dist/uart-mavlink) laser rangefinder, 8–3000 cm, UART MAVLink `DISTANCE_SENSOR` (sysid/compid 158, 115200 8N1). The sensor selects short-range (40 ms) or long-range (200 ms) by itself.
 
 ### Development/Testing
 
@@ -121,7 +122,7 @@ The port configuration depends on the selected driver:
 
 | `rangefinder_hardware` | Port configuration | Baud rate |
 |-----------------------|--------------------|-----------|
-| `BENEWAKE`, `NRA`, `USD1_V0` | Assign the UART to the Rangefinder function (`FUNCTION_RANGEFINDER`) | The driver opens the port at **115200 baud**; configure the sensor to match |
+| `BENEWAKE`, `NRA`, `USD1_V0`, `ARKDIST` | Assign the UART to the Rangefinder function (`FUNCTION_RANGEFINDER`) | The driver opens the port at **115200 baud**; configure the sensor to match. `ARKDIST` is receive-only (MAVLink `DISTANCE_SENSOR`) |
 | `MSP` | Enable MSP on the UART connected to the external sensor or adapter | Match the configured MSP baud rate to the sender |
 
 Set `rangefinder_hardware` to the protocol sent by the device, then save and reboot. An MSP sender must supply `MSP2_SENSOR_RANGEFINDER` messages; it does not use the dedicated Rangefinder port function.

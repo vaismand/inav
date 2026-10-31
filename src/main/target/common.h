@@ -177,6 +177,9 @@
 #ifndef USE_RANGEFINDER_NANORADAR
 #define USE_RANGEFINDER_NANORADAR
 #endif
+#ifndef USE_RANGEFINDER_ARKDIST
+#define USE_RANGEFINDER_ARKDIST
+#endif
 
 // Allow default optic flow boards
 #ifndef USE_OPFLOW

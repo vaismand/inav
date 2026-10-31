@@ -33,7 +33,16 @@ extern virtualRangefinderVTable_t rangefinderMSPVtable;
 extern virtualRangefinderVTable_t rangefinderBenewakeVtable;
 extern virtualRangefinderVTable_t rangefinderUSD1Vtable;
 extern virtualRangefinderVTable_t rangefinderNanoradarVtable; //NRA15/NRA24
+extern virtualRangefinderVTable_t rangefinderArkdistVtable;
 extern virtualRangefinderVTable_t rangefinderFakeVtable;
+
+// ARK DIST SR publishes at 40 ms in short range and 200 ms in long range, and
+// switches by itself. Four long-range periods covers that switch without
+// declaring the sensor dead.
+#define ARKDIST_MIN_RANGE_CM                8
+#define ARKDIST_MAX_RANGE_CM                3000
+#define ARKDIST_LONG_RANGE_INTERVAL_MS      200
+#define ARKDIST_HARDWARE_TIMEOUT_MS         (4 * ARKDIST_LONG_RANGE_INTERVAL_MS)
 
 void mspRangefinderReceiveNewData(uint8_t * bufferPtr, unsigned int dataSize);
 void fakeRangefindersSetData(int32_t data);

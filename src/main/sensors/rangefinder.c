@@ -148,6 +148,15 @@ static bool rangefinderDetect(rangefinderDev_t * dev, uint8_t rangefinderHardwar
             }
 #endif
             break;
+        case RANGEFINDER_ARKDIST:
+#if defined(USE_RANGEFINDER_ARKDIST)
+            if (virtualRangefinderDetect(dev, &rangefinderArkdistVtable)) {
+                rangefinderHardware = RANGEFINDER_ARKDIST;
+                dev->maxRangeCm = ARKDIST_MAX_RANGE_CM;
+                rescheduleTask(TASK_RANGEFINDER, TASK_PERIOD_MS(RANGEFINDER_VIRTUAL_TASK_PERIOD_MS));
+            }
+#endif
+            break;
 
             case RANGEFINDER_US42:
 #ifdef USE_RANGEFINDER_US42
@@ -299,6 +308,14 @@ int32_t rangefinderGetLatestRawAltitude(void) {
 
 bool rangefinderIsHealthy(void)
 {
-    return (millis() - rangefinder.lastValidResponseTimeMs) < RANGEFINDER_HARDWARE_TIMEOUT_MS;
+    timeMs_t hardwareTimeoutMs = RANGEFINDER_HARDWARE_TIMEOUT_MS;
+
+#if defined(USE_RANGEFINDER_ARKDIST)
+    if (detectedSensors[SENSOR_INDEX_RANGEFINDER] == RANGEFINDER_ARKDIST) {
+        hardwareTimeoutMs = ARKDIST_HARDWARE_TIMEOUT_MS;
+    }
+#endif
+
+    return (millis() - rangefinder.lastValidResponseTimeMs) < hardwareTimeoutMs;
 }
 #endif

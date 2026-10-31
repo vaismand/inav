@@ -6468,6 +6468,7 @@ Selection of rangefinder hardware.
 | TERARANGER_EVO |  |
 | USD1_V0 |  |
 | NRA |  |
+| ARKDIST |  |
 
 ---
 
