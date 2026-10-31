@@ -5153,6 +5153,7 @@ Selection of OPFLOW hardware.
 | CXOF |  |
 | MSP |  |
 | FAKE |  |
+| DRONECAN |  |
 
 ---
 
@@ -6468,6 +6469,7 @@ Selection of rangefinder hardware.
 | TERARANGER_EVO |  |
 | USD1_V0 |  |
 | NRA |  |
+| DRONECAN |  |
 
 ---
 

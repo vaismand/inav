@@ -7,6 +7,8 @@ DroneCAN (formerly UAVCAN v0) is a lightweight protocol designed for reliable co
 | Feature | Status | Description |
 |---------|--------|-------------|
 | GPS | Supported | GNSS receivers via DroneCAN |
+| Optical flow | Supported | `com.hex.equipment.flow.Measurement` (id 20200), used by ARK Flow / HereFlow |
+| Rangefinder | Supported | `uavcan.equipment.range_sensor.Measurement` (id 1050), the lidar on the same module |
 | Battery Voltage | Supported | Voltage sensing from DroneCAN battery monitors |
 | Battery Current | Supported | Current sensing from DroneCAN battery monitors |
 | Parameter Get/Set | Supported | Read/write DroneCAN peripheral parameters via the configurator's DroneCAN tab |
@@ -54,6 +56,27 @@ save
 ```
 
 The flight controller will automatically receive GPS data from any DroneCAN GNSS device on the bus.  GPS configuration needs to be set using dronecan_gui to enable additional satellite networks.
+
+### ARK Flow (optical flow and lidar)
+
+ARK Flow is one DroneCAN node. It ships with node id 0, so leave `dronecan_use_dna_server` at its default ON. The flight controller's existing allocator answers it. Do not load a second allocator. The bitrate still has to match; the default on both sides is 1000 kbps.
+
+Optical flow and the lidar are separate settings. The lidar is the module's own range sensor. It is not ARK DIST, which is a different unit on a UART.
+
+```
+set opflow_hardware = DRONECAN
+set opflow_scale = 1.0
+set rangefinder_hardware = DRONECAN
+save
+```
+
+`opflow_scale` stays 10.5 for a CXOF module. ARK Flow already publishes a radian integral, and the driver converts that to degrees, so the scale for this sensor is 1.0. Leaving 10.5 makes the flow about ten times too small and the position estimate will not hold.
+
+The driver's quality value is the node's own 0–255 figure. Samples at or below 10 are ignored by the existing optical-flow sensor code, and a sample has to reach 35 before it is treated as valid. The node's gyro integral is not used; body rate still comes from the flight-controller gyro.
+
+A message that arrives more than 100 ms after the previous one, or whose own integration interval is longer than 100 ms, is dropped. The position estimator is unchanged. It still multiplies a correction by the wall-clock time since the previous accepted sample, so a gap that is long but still inside the 200 ms flow-health window produces one larger correction. Position hold on this sensor needs a rangefinder as well, the same as CXOF.
+
+There is one rangefinder slot. `DRONECAN` and a UART rangefinder cannot both be selected.
 
 ### Battery Monitoring via DroneCAN
 

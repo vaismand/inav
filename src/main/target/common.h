@@ -188,6 +188,13 @@
 #ifndef USE_OPFLOW_MSP
 #define USE_OPFLOW_MSP
 #endif
+/*
+ * USE_OPFLOW_DRONECAN and USE_RANGEFINDER_DRONECAN are not defined here.
+ * target.h, which sets USE_DRONECAN, is included after this file.
+ * common_post.h turns the two drivers on when that flag is set.
+ * A target can opt out by defining OMIT_OPFLOW_DRONECAN or
+ * OMIT_RANGEFINDER_DRONECAN before common_post.h.
+ */
 
 // Allow default airspeed sensors
 #ifndef USE_PITOT

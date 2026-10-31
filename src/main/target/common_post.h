@@ -84,6 +84,15 @@ extern uint8_t __config_end;
 #define RANGEFINDER_I2C_BUS DEFAULT_I2C_BUS
 #endif
 
+// ARK Flow publishes optical flow and a lidar on DroneCAN. The target
+// defines USE_DRONECAN after common.h, so the gate has to live here.
+#if defined(USE_DRONECAN) && defined(USE_OPFLOW) && !defined(OMIT_OPFLOW_DRONECAN)
+#define USE_OPFLOW_DRONECAN
+#endif
+#if defined(USE_DRONECAN) && defined(USE_RANGEFINDER) && !defined(OMIT_RANGEFINDER_DRONECAN)
+#define USE_RANGEFINDER_DRONECAN
+#endif
+
 // Enable MSP_DISPLAYPORT for F3 targets without builtin OSD,
 // since it's used to display CMS on MWOSD
 #if !defined(USE_MSP_DISPLAYPORT) && !defined(USE_OSD)

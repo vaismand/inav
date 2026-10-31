@@ -558,10 +558,12 @@ main_sources(COMMON_SRC
     io/rangefinder_benewake.c
     io/rangefinder_usd1_v0.c
     io/rangefinder_nanoradar.c
+    io/rangefinder_dronecan.c
     io/rangefinder_fake.c
     io/opflow.h
     io/opflow_cxof.c
     io/opflow_msp.c
+    io/opflow_dronecan.c
     io/dashboard.c
     io/dashboard.h
     io/displayport_frsky_osd.c

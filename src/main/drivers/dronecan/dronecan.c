@@ -37,10 +37,28 @@
 #include "sensors/battery_sensor_dronecan.h"
 #include "sensors/diagnostics.h"
 
+#if defined(USE_OPFLOW_DRONECAN)
+#include "io/opflow.h"
+#include "sensors/opflow.h"
+#endif
+#if defined(USE_RANGEFINDER_DRONECAN)
+#include "io/rangefinder.h"
+#include "sensors/rangefinder.h"
+#endif
+
 /* Private variables ---------------------------------------------------------*/
 
 CanardInstance canard; /* non-static: dronecan_async.c needs extern access */
+/*
+ * Flow and range transfers sit in this pool next to GNSS and battery.
+ * 1024 bytes is enough for those two; the extra subscriptions need the
+ * second kilobyte or libcanard drops frames while a transfer is open.
+ */
+#if defined(USE_OPFLOW_DRONECAN) || defined(USE_RANGEFINDER_DRONECAN)
+static uint8_t memory_pool[2048];
+#else
 static uint8_t memory_pool[1024];
+#endif
 
 PG_REGISTER_WITH_RESET_TEMPLATE(dronecanConfig_t, dronecanConfig, PG_DRONECAN_CONFIG, 1);
 
@@ -424,6 +442,22 @@ static bool shouldAcceptTransfer(const CanardInstance *ins,
         case UAVCAN_EQUIPMENT_POWER_BATTERYINFO_ID:
             *out_data_type_signature = UAVCAN_EQUIPMENT_POWER_BATTERYINFO_SIGNATURE;
             return true;
+#if defined(USE_OPFLOW_DRONECAN)
+        case COM_HEX_EQUIPMENT_FLOW_MEASUREMENT_ID:
+            if (opticalFlowConfig()->opflow_hardware == OPFLOW_DRONECAN) {
+                *out_data_type_signature = COM_HEX_EQUIPMENT_FLOW_MEASUREMENT_SIGNATURE;
+                return true;
+            }
+            return false;
+#endif
+#if defined(USE_RANGEFINDER_DRONECAN)
+        case UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_ID:
+            if (rangefinderConfig()->rangefinder_hardware == RANGEFINDER_DRONECAN) {
+                *out_data_type_signature = UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_SIGNATURE;
+                return true;
+            }
+            return false;
+#endif
         }
     }
     return false;
@@ -477,6 +511,32 @@ static void handle_GNSSRCTMStream(CanardInstance *ins, CanardRxTransfer *transfe
 		return;
 	}
 }
+
+#if defined(USE_OPFLOW_DRONECAN)
+static void handle_HexFlowMeasurement(CanardInstance *ins, CanardRxTransfer *transfer) {
+    UNUSED(ins);
+    struct com_hex_equipment_flow_Measurement flowMeasurement;
+
+    if (com_hex_equipment_flow_Measurement_decode(transfer, &flowMeasurement)) {
+        LOG_DEBUG(CAN, "Hex flow measurement decode failed");
+        return;
+    }
+    dronecanOpflowReceiveMeasurement(&flowMeasurement);
+}
+#endif
+
+#if defined(USE_RANGEFINDER_DRONECAN)
+static void handle_RangeSensorMeasurement(CanardInstance *ins, CanardRxTransfer *transfer) {
+    UNUSED(ins);
+    struct uavcan_equipment_range_sensor_Measurement rangeMeasurement;
+
+    if (uavcan_equipment_range_sensor_Measurement_decode(transfer, &rangeMeasurement)) {
+        LOG_DEBUG(CAN, "Range sensor measurement decode failed");
+        return;
+    }
+    dronecanRangefinderReceiveMeasurement(&rangeMeasurement);
+}
+#endif
 
 static void handle_BatteryInfo(CanardInstance *ins, CanardRxTransfer *transfer) {
 	UNUSED(ins);
@@ -595,6 +655,17 @@ static void onTransferReceived(CanardInstance *ins, CanardRxTransfer *transfer) 
             case UAVCAN_EQUIPMENT_POWER_BATTERYINFO_ID:
                 handle_BatteryInfo(ins, transfer);
                 break;
+
+#if defined(USE_OPFLOW_DRONECAN)
+            case COM_HEX_EQUIPMENT_FLOW_MEASUREMENT_ID:
+                handle_HexFlowMeasurement(ins, transfer);
+                break;
+#endif
+#if defined(USE_RANGEFINDER_DRONECAN)
+            case UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_ID:
+                handle_RangeSensorMeasurement(ins, transfer);
+                break;
+#endif
         }
 	}
 }

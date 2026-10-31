@@ -1,4 +1,5 @@
 #pragma once
+#include "com.hex.equipment.flow.Measurement.h"
 #include "dronecan.protocol.CanStats.h"
 #include "dronecan.protocol.FlexDebug.h"
 #include "dronecan.protocol.GlobalTime.h"

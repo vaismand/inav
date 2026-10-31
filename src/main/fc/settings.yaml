@@ -5,13 +5,13 @@ tables:
     values: ["NONE", "AUTO", "MPU6000", "MPU6500", "MPU9250", "BMI160", "ICM20689", "BMI088", "ICM42605", "BMI270","LSM6DXX", "ICM45686", "ICM40609D", "FAKE"]
     enum: accelerationSensor_e
   - name: rangefinder_hardware
-    values: ["NONE", "SRF10", "VL53L0X", "MSP", "BENEWAKE", "VL53L1X", "US42", "TOF10120_I2C", "FAKE", "TERARANGER_EVO", "USD1_V0", "NRA"]
+    values: ["NONE", "SRF10", "VL53L0X", "MSP", "BENEWAKE", "VL53L1X", "US42", "TOF10120_I2C", "FAKE", "TERARANGER_EVO", "USD1_V0", "NRA", "DRONECAN"]
     enum: rangefinderType_e
   - name: mag_hardware
     values: ["NONE", "AUTO", "HMC5883", "AK8975", "MAG3110", "AK8963", "IST8310", "QMC5883", "QMC5883P", "MPU9250", "IST8308", "LIS3MDL", "MSP", "RM3100", "VCM5883", "MLX90393", "LIS2MDL", "FAKE"]
     enum: magSensor_e
   - name: opflow_hardware
-    values: ["NONE", "CXOF", "MSP", "FAKE"]
+    values: ["NONE", "CXOF", "MSP", "FAKE", "DRONECAN"]
     enum: opticalFlowSensor_e
   - name: baro_hardware
     values: ["NONE", "AUTO", "BMP085", "MS5611", "BMP280", "MS5607", "LPS25H", "SPL06", "BMP388", "DPS310", "B2SMPB", "MSP", "FAKE", "CRSF"]

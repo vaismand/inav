@@ -59,6 +59,7 @@ set(DSDLC_GENERATED_SRC
     uavcan.equipment.power.BatteryInfo.c                        
     uavcan.equipment.power.CircuitStatus.c                      
     uavcan.equipment.power.PrimaryPowerSupplyStatus.c           
+    com.hex.equipment.flow.Measurement.c
     uavcan.equipment.range_sensor.Measurement.c                 
     uavcan.equipment.safety.ArmingStatus.c 
     uavcan.navigation.GlobalNavigationSolution.c

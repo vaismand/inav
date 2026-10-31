@@ -148,6 +148,15 @@ static bool rangefinderDetect(rangefinderDev_t * dev, uint8_t rangefinderHardwar
             }
 #endif
             break;
+        case RANGEFINDER_DRONECAN:
+#if defined(USE_RANGEFINDER_DRONECAN)
+            if (virtualRangefinderDetect(dev, &rangefinderDronecanVtable)) {
+                rangefinderHardware = RANGEFINDER_DRONECAN;
+                dev->maxRangeCm = RANGEFINDER_DRONECAN_MAX_RANGE_CM;
+                rescheduleTask(TASK_RANGEFINDER, TASK_PERIOD_MS(RANGEFINDER_VIRTUAL_TASK_PERIOD_MS));
+            }
+#endif
+            break;
 
             case RANGEFINDER_US42:
 #ifdef USE_RANGEFINDER_US42

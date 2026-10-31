@@ -33,7 +33,15 @@ extern virtualRangefinderVTable_t rangefinderMSPVtable;
 extern virtualRangefinderVTable_t rangefinderBenewakeVtable;
 extern virtualRangefinderVTable_t rangefinderUSD1Vtable;
 extern virtualRangefinderVTable_t rangefinderNanoradarVtable; //NRA15/NRA24
+extern virtualRangefinderVTable_t rangefinderDronecanVtable;
 extern virtualRangefinderVTable_t rangefinderFakeVtable;
+
+// Longer of the ARK Flow lidar family (Flow MR). The shorter Flow lidar
+// still reports inside this. Navigation uses inav_max_surface_altitude.
+#define RANGEFINDER_DRONECAN_MAX_RANGE_CM   5000
+
+struct uavcan_equipment_range_sensor_Measurement;
+void dronecanRangefinderReceiveMeasurement(const struct uavcan_equipment_range_sensor_Measurement *msg);
 
 void mspRangefinderReceiveNewData(uint8_t * bufferPtr, unsigned int dataSize);
 void fakeRangefindersSetData(int32_t data);
