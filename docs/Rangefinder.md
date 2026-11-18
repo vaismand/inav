@@ -49,6 +49,7 @@ NRA15/NRA24 sensors can use US-D1_V0 or NRA protocol depending on firmware confi
 
 * **MSP** - External rangefinder via MSP protocol (UART/MSP)
 * **BENEWAKE** - Benewake LIDAR modules (TFmini, etc.) via serial protocol (UART)
+* **DRONECAN** - Any sensor that publishes the standard DroneCAN `uavcan.equipment.range_sensor.Measurement` message (CAN)
 
 ### Development/Testing
 
@@ -125,6 +126,17 @@ The port configuration depends on the selected driver:
 | `MSP` | Enable MSP on the UART connected to the external sensor or adapter | Match the configured MSP baud rate to the sender |
 
 Set `rangefinder_hardware` to the protocol sent by the device, then save and reboot. An MSP sender must supply `MSP2_SENSOR_RANGEFINDER` messages; it does not use the dedicated Rangefinder port function.
+
+### DroneCAN Rangefinders
+
+Connect the sensor to the CAN port of a target built with DroneCAN support and set up the bus as described in [DroneCAN](DroneCAN.md). No serial port is used.
+
+```
+set rangefinder_hardware = DRONECAN
+save
+```
+
+INAV uses every `uavcan.equipment.range_sensor.Measurement` message on the bus as the distance to the ground. The sender's node ID, `sensor_id` and beam orientation are not checked, so the sensor must point down and only one range sensor should be on the bus. A `reading_type` other than `VALID_RANGE` is treated as out of range.
 
 ## Optical Flow Integration
 

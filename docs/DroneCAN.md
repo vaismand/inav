@@ -9,6 +9,7 @@ DroneCAN (formerly UAVCAN v0) is a lightweight protocol designed for reliable co
 | GPS | Supported | GNSS receivers via DroneCAN |
 | Battery Voltage | Supported | Voltage sensing from DroneCAN battery monitors |
 | Battery Current | Supported | Current sensing from DroneCAN battery monitors |
+| Rangefinder | Supported | Distance sensors via DroneCAN |
 | Parameter Get/Set | Supported | Read/write DroneCAN peripheral parameters via the configurator's DroneCAN tab |
 | ESC Control | Planned | Motor control via DroneCAN ESCs |
 | Dynamic Node Assignment | Supported | Automatically assign CAN node IDs to plug-and-play DroneCAN peripherals |
@@ -73,6 +74,17 @@ save
 ```
 
 Both voltage and current come from the same DroneCAN BatteryInfo message, so they update together when using a DroneCAN battery monitor.
+
+### Rangefinder via DroneCAN
+
+To use a DroneCAN distance sensor:
+
+```
+set rangefinder_hardware = DRONECAN
+save
+```
+
+The flight controller uses the `uavcan.equipment.range_sensor.Measurement` message from any device on the bus. See [Rangefinder](Rangefinder.md) for details.
 
 ### Parameter Get/Set via DroneCAN
 
