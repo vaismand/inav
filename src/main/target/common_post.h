@@ -84,6 +84,10 @@ extern uint8_t __config_end;
 #define RANGEFINDER_I2C_BUS DEFAULT_I2C_BUS
 #endif
 
+#if defined(USE_DRONECAN) && defined(USE_RANGEFINDER)
+#define USE_RANGEFINDER_DRONECAN
+#endif
+
 // Enable MSP_DISPLAYPORT for F3 targets without builtin OSD,
 // since it's used to display CMS on MWOSD
 #if !defined(USE_MSP_DISPLAYPORT) && !defined(USE_OSD)

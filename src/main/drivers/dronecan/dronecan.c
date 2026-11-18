@@ -30,6 +30,7 @@
 #include "fc/settings.h"
 
 #include "io/gps.h"
+#include "io/rangefinder.h"
 
 #include "libcanard/canard.h"
 #include "libcanard/canard_stm32_driver.h"
@@ -424,6 +425,11 @@ static bool shouldAcceptTransfer(const CanardInstance *ins,
         case UAVCAN_EQUIPMENT_POWER_BATTERYINFO_ID:
             *out_data_type_signature = UAVCAN_EQUIPMENT_POWER_BATTERYINFO_SIGNATURE;
             return true;
+#ifdef USE_RANGEFINDER_DRONECAN
+        case UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_ID:
+            *out_data_type_signature = UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_SIGNATURE;
+            return true;
+#endif
         }
     }
     return false;
@@ -488,6 +494,19 @@ static void handle_BatteryInfo(CanardInstance *ins, CanardRxTransfer *transfer) 
 	}
     dronecanBatterySensorReceiveInfo(&batteryInfo);
 }
+
+#ifdef USE_RANGEFINDER_DRONECAN
+static void handle_RangeSensorMeasurement(CanardInstance *ins, CanardRxTransfer *transfer) {
+    UNUSED(ins);
+    struct uavcan_equipment_range_sensor_Measurement measurement;
+
+    if (uavcan_equipment_range_sensor_Measurement_decode(transfer, &measurement)) {
+        LOG_WARNING(CAN, "RangeSensorMeasurement decode failed");
+        return;
+    }
+    dronecanRangefinderReceive(measurement.range, measurement.reading_type);
+}
+#endif
 
 /*
   handle a GetNodeInfo request
@@ -595,6 +614,12 @@ static void onTransferReceived(CanardInstance *ins, CanardRxTransfer *transfer) 
             case UAVCAN_EQUIPMENT_POWER_BATTERYINFO_ID:
                 handle_BatteryInfo(ins, transfer);
                 break;
+
+#ifdef USE_RANGEFINDER_DRONECAN
+            case UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_ID:
+                handle_RangeSensorMeasurement(ins, transfer);
+                break;
+#endif
         }
 	}
 }
