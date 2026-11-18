@@ -38,6 +38,7 @@ extern "C" {
 /* INAV headers pulled in by dronecan.c — included here so the types are
    available when we define stub globals below. */
 #include "io/gps.h"
+#include "io/rangefinder.h"
 #include "sensors/battery_sensor_dronecan.h"
 #include "fc/runtime_config.h"
 #include "sensors/diagnostics.h"
@@ -515,6 +516,52 @@ protected:
         canardSetLocalNodeID(&ins, 1);
     }
 };
+
+/* Push one range_sensor.Measurement broadcast through the dispatch path and
+ * return what the rangefinder layer would read from the DRONECAN driver. */
+static int32_t receiveRangeMeasurement(CanardInstance *ins, float rangeMeters, uint8_t readingType)
+{
+    struct uavcan_equipment_range_sensor_Measurement msg;
+    memset(&msg, 0, sizeof(msg));
+    msg.range = rangeMeters;
+    msg.reading_type = readingType;
+
+    uint8_t payload[UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_MAX_SIZE];
+    CanardRxTransfer xfer;
+    memset(&xfer, 0, sizeof(xfer));
+    xfer.transfer_type  = CanardTransferTypeBroadcast;
+    xfer.data_type_id   = UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_ID;
+    xfer.source_node_id = 42;
+    xfer.payload_head   = payload;
+    xfer.payload_len    = (uint16_t)uavcan_equipment_range_sensor_Measurement_encode(&msg, payload);
+
+    onTransferReceived(ins, &xfer);
+
+    return rangefinderDronecanVtable.read();
+}
+
+TEST_F(DroneCANDispatchTest, RangeSensorMeasurementFeedsRangefinder)
+{
+    uint64_t signature = 0;
+    EXPECT_TRUE(shouldAcceptTransfer(NULL, &signature, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_ID,
+                                     CanardTransferTypeBroadcast, 42));
+    EXPECT_EQ(signature, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_SIGNATURE);
+
+    /* Metres on the wire, centimetres in INAV */
+    EXPECT_EQ(receiveRangeMeasurement(&ins, 1.25f, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_READING_TYPE_VALID_RANGE), 125);
+    EXPECT_EQ(receiveRangeMeasurement(&ins, 30.0f, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_READING_TYPE_VALID_RANGE), 3000);
+
+    /* Anything but a valid range is out of range */
+    EXPECT_EQ(receiveRangeMeasurement(&ins, 1.25f, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_READING_TYPE_TOO_CLOSE), RANGEFINDER_OUT_OF_RANGE);
+    EXPECT_EQ(receiveRangeMeasurement(&ins, 1.25f, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_READING_TYPE_TOO_FAR), RANGEFINDER_OUT_OF_RANGE);
+    EXPECT_EQ(receiveRangeMeasurement(&ins, 1.25f, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_READING_TYPE_UNDEFINED), RANGEFINDER_OUT_OF_RANGE);
+    EXPECT_EQ(receiveRangeMeasurement(&ins, 0.0f, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_READING_TYPE_VALID_RANGE), RANGEFINDER_OUT_OF_RANGE);
+    EXPECT_EQ(receiveRangeMeasurement(&ins, NAN, UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_READING_TYPE_VALID_RANGE), RANGEFINDER_OUT_OF_RANGE);
+
+    /* Each message is read once. A silent bus then reports no new data, which
+     * is what lets sensors/rangefinder.c time the sensor out. */
+    EXPECT_EQ(rangefinderDronecanVtable.read(), RANGEFINDER_NO_NEW_DATA);
+}
 
 /* GAP-S2: GetNodeInfo response → handler populates async slot result.
  * The node table (dronecanNodeInfo_t) holds only NodeStatus-level fields since

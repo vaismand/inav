@@ -118,11 +118,14 @@ set_property(SOURCE dronecan_application_unittest.cc PROPERTY extra_sources
     "../../lib/main/Dronecan/dsdlc_generated/src/uavcan.protocol.param.Value.c"
     "../../lib/main/Dronecan/dsdlc_generated/src/uavcan.protocol.param.NumericValue.c"
     "../../lib/main/Dronecan/dsdlc_generated/src/uavcan.protocol.param.Empty.c"
-    "../../lib/main/Dronecan/dsdlc_generated/src/uavcan.protocol.dynamic_node_id.Allocation.c")
+    "../../lib/main/Dronecan/dsdlc_generated/src/uavcan.protocol.dynamic_node_id.Allocation.c"
+    "../../lib/main/Dronecan/dsdlc_generated/src/uavcan.equipment.range_sensor.Measurement.c"
+    "../../lib/main/Dronecan/dsdlc_generated/src/uavcan.CoarseOrientation.c"
+    "io/rangefinder_dronecan.c")
 set_property(SOURCE dronecan_application_unittest.cc PROPERTY extra_includes
     "../../lib/main/Dronecan/dsdlc_generated/include")
 set_property(SOURCE dronecan_application_unittest.cc PROPERTY definitions
-    USE_DRONECAN CANARD_ENABLE_TAO_OPTION=0
+    USE_DRONECAN USE_RANGEFINDER_DRONECAN CANARD_ENABLE_TAO_OPTION=0
     FC_VERSION_MAJOR=10 FC_VERSION_MINOR=0 FC_VERSION_PATCH_LEVEL=0)
 
 # PARAM_GETSET MSP payload parser - extracted from fc_msp.c's giant command
