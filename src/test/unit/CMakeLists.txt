@@ -128,6 +128,14 @@ set_property(SOURCE dronecan_application_unittest.cc PROPERTY definitions
     USE_DRONECAN USE_RANGEFINDER_DRONECAN CANARD_ENABLE_TAO_OPTION=0
     FC_VERSION_MAJOR=10 FC_VERSION_MINOR=0 FC_VERSION_PATCH_LEVEL=0)
 
+# DroneCAN rangefinder through the real sensor layer
+set_property(SOURCE rangefinder_dronecan_unittest.cc PROPERTY depends
+    "sensors/rangefinder.c" "drivers/rangefinder/rangefinder_virtual.c" "common/maths.c")
+set_property(SOURCE rangefinder_dronecan_unittest.cc PROPERTY extra_sources
+    "io/rangefinder_dronecan.c")
+set_property(SOURCE rangefinder_dronecan_unittest.cc PROPERTY definitions
+    USE_RANGEFINDER USE_RANGEFINDER_DRONECAN CANARD_ENABLE_TAO_OPTION=0)
+
 # PARAM_GETSET MSP payload parser - extracted from fc_msp.c's giant command
 # switch (PR #11683 Qodo review Finding 2) specifically so it's unit testable.
 set_property(SOURCE fc_msp_dronecan_unittest.cc PROPERTY depends
